@@ -260,12 +260,91 @@ const getAllAttendance = async (
 };
 
 
+// GET ATTENDANCE SUMMARY FOR DASHBOARD
+const getAttendanceSummary = async (req, res) => {
+    try {
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+        
+        const tomorrow = new Date(today);
+        tomorrow.setDate(tomorrow.getDate() + 1);
+
+        const totalStudents = await User.countDocuments({ role: "student" });
+        
+        const markedToday = await Attendance.find({
+            date: { $gte: today, $lt: tomorrow }
+        }).distinct("student");
+        
+        const presentToday = await Attendance.countDocuments({
+            date: { $gte: today, $lt: tomorrow },
+            status: "present"
+        });
+
+        const totalMarked = markedToday.length;
+        const percentage = totalMarked === 0 ? 0 : ((presentToday / totalMarked) * 100).toFixed(2);
+
+        res.json({
+            totalStudents,
+            totalMarked,
+            present: presentToday,
+            absent: totalMarked - presentToday,
+            percentage: Number(percentage)
+        });
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+};
+
+// GET ATTENDANCE FOR SPECIFIC DATE
+const getAttendanceByDate = async (req, res) => {
+    try {
+        const { date } = req.params;
+
+        const start = new Date(date);
+        start.setHours(0, 0, 0, 0);
+
+        const end = new Date(date);
+        end.setHours(23, 59, 59, 999);
+
+        // Get all students
+        const students = await User.find({ role: "student" }).select("-password");
+
+        // Get attendance records for this date
+        const attendanceRecords = await Attendance.find({
+            date: { $gte: start, $lte: end }
+        });
+
+        // Map students with their attendance status
+        const records = students.map(student => {
+            const attendance = attendanceRecords.find(a => a.student.toString() === student._id.toString());
+            return {
+                student: {
+                    _id: student._id,
+                    name: student.name,
+                    email: student.email,
+                    rollNumber: student.rollNumber,
+                    course: student.course
+                },
+                attendance: attendance || null
+            };
+        });
+
+        res.json(records);
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+};
+
 module.exports = {
 
     markAttendance,
 
     getMyAttendance,
 
-    getAllAttendance
+    getAllAttendance,
+
+    getAttendanceSummary,
+
+    getAttendanceByDate
 
 };

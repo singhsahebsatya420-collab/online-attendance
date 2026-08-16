@@ -3,7 +3,9 @@ const express = require("express");
 const {
     markAttendance,
     getMyAttendance,
-    getAllAttendance
+    getAllAttendance,
+    getAttendanceSummary,
+    getAttendanceByDate
 } =
     require(
         "../controllers/attendenceController"
@@ -28,6 +30,21 @@ const {
 
 const router =
     express.Router();
+
+
+router.get(
+    "/summary",
+    protect,
+    adminOnly,
+    getAttendanceSummary
+);
+
+
+router.get(
+    "/date/:date",
+    protect,
+    getAttendanceByDate
+);
 
 
 router.get(
