@@ -25,11 +25,9 @@ export default function AdminDashboard() {
     }, [today]);
 
     const total = summary?.totalStudents || 0;
-    const marked = summary?.totalMarked || 0;
     const present = Math.min(summary?.present || 0, total);
-    const absent = Math.max(marked - present, 0);
-    const notMarked = Math.max(total - marked, 0);
-    const percentage = total === 0 ? 0 : (marked === 0 ? 0 : ((present / marked) * 100).toFixed(2));
+    const absent = Math.max(total - present, 0);
+    const percentage = total === 0 ? 0 : ((present / total) * 100).toFixed(2);
 
     return (
         <div className="dashboard-page">
@@ -47,9 +45,9 @@ export default function AdminDashboard() {
 
                 <div className="row g-3 mb-4">
                     <div className="col-sm-6 col-xl-3"><div className="metric-card"><div className="metric-icon blue">👨‍🎓</div><div><span>Total Students</span><strong>{total}</strong><small>Registered students</small></div></div></div>
-                    <div className="col-sm-6 col-xl-3"><div className="metric-card"><div className="metric-icon green">✓</div><div><span>Present Today</span><strong>{present}</strong><small className="green-text">Students present</small></div></div></div>
-                    <div className="col-sm-6 col-xl-3"><div className="metric-card"><div className="metric-icon red">×</div><div><span>Absent Today</span><strong>{absent}</strong><small className="red-text">Students absent</small></div></div></div>
-                    <div className="col-sm-6 col-xl-3"><div className="metric-card"><div className="metric-icon purple">%</div><div><span>Attendance Rate</span><strong>{percentage}%</strong><small>Today's rate</small></div></div></div>
+                    <div className="col-sm-6 col-xl-3"><div className="metric-card"><div className="metric-icon green">✓</div><div><span>Present Today</span><strong>{present}</strong><small className="green-text">Max: {total} students</small></div></div></div>
+                    <div className="col-sm-6 col-xl-3"><div className="metric-card"><div className="metric-icon red">×</div><div><span>Absent Today</span><strong>{absent}</strong><small className="red-text">Not present ({absent}/{total})</small></div></div></div>
+                    <div className="col-sm-6 col-xl-3"><div className="metric-card"><div className="metric-icon purple">%</div><div><span>Attendance Rate</span><strong>{percentage}%</strong><small>Overall present rate</small></div></div></div>
                 </div>
 
                 <div className="row g-4 mb-4">
@@ -59,9 +57,9 @@ export default function AdminDashboard() {
                             <div className="overview-content">
                                 <div className="donut" style={{ "--progress": `${percentage}%` }}><div><strong>{percentage}%</strong><span>Attendance</span></div></div>
                                 <div className="legend-list">
-                                    <div><span className="legend-dot present-dot"></span><div><strong>{present}</strong><small>Present</small></div></div>
+                                    <div><span className="legend-dot present-dot"></span><div><strong>{present}</strong><small>Present (Max {total})</small></div></div>
                                     <div><span className="legend-dot absent-dot"></span><div><strong>{absent}</strong><small>Absent</small></div></div>
-                                    <div><span className="legend-dot pending-dot"></span><div><strong>{notMarked}</strong><small>Not marked</small></div></div>
+                                    <div><span className="legend-dot pending-dot"></span><div><strong>{total}</strong><small>Total Students</small></div></div>
                                 </div>
                             </div>
                         </div>
